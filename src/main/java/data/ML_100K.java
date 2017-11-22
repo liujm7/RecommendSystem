@@ -42,14 +42,14 @@ public class ML_100K {
     }
 
     public static void itemKNNTest(List<Rating> baseRatings, List<Rating> testRatings) {
-        ItemKNN knn = new ItemKNN();
-        knn.itemKNNMaeRmse(baseRatings, testRatings, maxUserId, maxItemId);
+        ItemCF knn = new ItemCF();
+        knn.itemCFMaeRmse(baseRatings, testRatings, maxUserId, maxItemId);
     }
 
 
     public static void userKNNTest(List<Rating> baseRatings, List<Rating> testRatings) {
-        UserKNN knn = new UserKNN();
-        knn.userKNNMaeRmse(baseRatings, testRatings, maxUserId, maxItemId);
+        UserCF knn = new UserCF();
+        knn.userCFMaeRmse(baseRatings, testRatings, maxUserId, maxItemId);
     }
 
     public static void matrixFactorizationTest(List<Rating> baseRatings, List<Rating> testRatings) {
@@ -85,9 +85,9 @@ public class ML_100K {
 
          Tools.updateIndexesToZeroBased(baseRatings);
          Tools.updateIndexesToZeroBased(testRatings);
-//        UserKNNv2 userKNNv2 =new UserKNNv2();
-//        userKNNv2.testTopNRecommend(baseRatings,testRatings);
-        ItemKNNv2 itemKNNv2 = new ItemKNNv2();
+//        UserKNN userKNNv2 =new UserKNN();
+//        userKNN.testTopNRecommend(baseRatings,testRatings);
+        ItemKNN itemKNNv2 = new ItemKNN();
         itemKNNv2.testTopNRecommend(baseRatings,testRatings);
 //        Tuple tuple=Tools.getMaxUserIdAndItemId(baseRatings);
 //        FriendMatrixFactorization matrixFactorization = new FriendMatrixFactorization(maxUserId, maxItemId, 20, "uniform");

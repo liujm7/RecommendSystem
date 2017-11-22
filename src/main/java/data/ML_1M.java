@@ -72,9 +72,9 @@ public class ML_1M {
 
 //        Baseline baseLine = new Baseline(maxUserId, maxItemId);
 //        baseLine.baseLineEvaluate(baseRatings, testRatings);
-//        UserKNNv2 userKNNv2 =new UserKNNv2();
-//        userKNNv2.testTopNRecommend(baseRatings,testRatings);
-        ItemKNNv2 itemKNNv2 = new ItemKNNv2();
+//        UserKNN userKNN =new UserKNN();
+//        userKNN.testTopNRecommend(baseRatings,testRatings);
+        ItemKNN itemKNNv2 = new ItemKNN();
         itemKNNv2.testTopNRecommend(baseRatings,testRatings);
 //        Tuple tuple=Tools.getMaxUserIdAndItemId(baseRatings);
 //        AlternatingLeastSquares matrixFactorization = new AlternatingLeastSquares(maxUserId, maxItemId, 50, "uniform_df");
