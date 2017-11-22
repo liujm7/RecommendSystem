@@ -144,16 +144,22 @@ public class ItemKNNv2 {
             N = 10;
 
         RsTable recommendedTable = new RsTable();
+        List<Object> itemsList = ratingTable.getSubKeyList();
+        ConcurrentHashMap<Object, List<Link>> similarItemsMap = new ConcurrentHashMap<>();
+        for (Object items : itemsList) {
+            List<Link> similarItems = getSimilarItems(W, (Integer) items, K);
+            similarItemsMap.put(items, similarItems);
+        }
+
         //遍历评分表
 
-        for (Object userId : ratingTable.keys()) { //O(N * M *K)
+        for (Object userId : ratingTable.keys()) { //O(N * M * K)
             //获取目前用户已经进行评分的商品 - 用于过滤
             ConcurrentHashMap<Object, Object> Nu = (ConcurrentHashMap) ratingTable.get(userId);
 
-//            ConcurrentHashMap<Object, Object> Nu = new ConcurrentHashMap<>((ConcurrentHashMap) ratingTable.get(userId));
             for (Object itemId : Nu.keySet()) {
                 //获取相似的商品列表
-                List<Link> similarItems = getSimilarItems(W, (Integer) itemId, K);
+                List<Link> similarItems = similarItemsMap.get(itemId);
                 for (Link l : similarItems) {
                     int iId = l.to;
                     //过滤已经评分的商品
@@ -228,8 +234,11 @@ public class ItemKNNv2 {
 
         RsTable ratingTable = Tools.getRatingTable(train);
 
-        List<Integer> Ns = new ArrayList<>(Arrays.asList(1, 5, 10, 15, 20, 25, 30));
+//        List<Integer> Ns = new ArrayList<>(Arrays.asList(1, 5, 10, 15, 20, 25, 30));
+        List<Integer> Ns = new ArrayList<>(Arrays.asList(80));
+
         List<Integer> Ks = new ArrayList<>(Arrays.asList(5, 10, 20, 40, 80, 160));
+//        List<Integer> Ks = new ArrayList<>(Arrays.asList(80));
 
         for (int k : Ks) {
             for (int n : Ns) {
