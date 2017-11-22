@@ -128,11 +128,11 @@ public class MatrixFactorization {
         double rmse = 0;
         for (Rating r : ratings) {
             double pui = predict(r.userId, r.itemId);
-            if (pui < minRating) {
-                pui = minRating;
-            } else if (pui > maxRating) {
-                pui = maxRating;
-            }
+//            if (pui < minRating) {
+//                pui = minRating;
+//            } else if (pui > maxRating) {
+//                pui = maxRating;
+//            }
             double eui = r.score - pui;
             mae += Math.abs(eui);
             rmse += eui * eui;
@@ -295,7 +295,7 @@ public class MatrixFactorization {
         RsTable ratingTable = Tools.getRatingTable(train);
 
 //        int[] K = {1, 5, 10, 15, 20, 25, 30};
-        int[] K = {40};
+        int[] K = {80};
 
         for (int epoch = 1; epoch <= epochs; epoch++) {
             for (Rating r : train) {
@@ -308,7 +308,7 @@ public class MatrixFactorization {
             }
 
             double lastLoss = computeLoss(train, lambda);
-            if (epoch % 5 == 0) {
+            if (epoch % 10 == 0) {
                 List<Rating> recommendations = getRecommendations(ratingTable, K[K.length - 1]);   // note that, the max K
                 for (int k : K) {
                     List<Rating> subset = Tools.getSubset(recommendations, k);

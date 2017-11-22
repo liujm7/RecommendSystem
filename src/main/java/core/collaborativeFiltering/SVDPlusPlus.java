@@ -61,15 +61,20 @@ public class SVDPlusPlus {
             Z = MathUtility.randomGaussian(p, f, 0, 1);
             Y = MathUtility.randomGaussian(q, f, 0, 1);
         } else if (fillMethod.equalsIgnoreCase("uniform_df")) {
-            P = MathUtility.randomGaussian(p, f, 0, 1);
-            Q = MathUtility.randomGaussian(q, f, 0, 1);
-            Z = MathUtility.randomGaussian(p, f, 0, 1);
-            Y = MathUtility.randomGaussian(q, f, 0, 1);
-        } else {
-            P = MathUtility.randomGaussian(p, f, 0, 1);
-            Q = MathUtility.randomGaussian(q, f, 0, 1);
-            Z = MathUtility.randomGaussian(p, f, 0, 1);
-            Y = MathUtility.randomGaussian(q, f, 0, 1);
+            P = MathUtility.randomUniform(p, f, 1.0 / Math.sqrt(f));
+            Q = MathUtility.randomUniform(q, f, 1.0 / Math.sqrt(f));
+            Z = MathUtility.randomUniform(p, f, 1.0 / Math.sqrt(f));
+            Y = MathUtility.randomUniform(q, f, 1.0 / Math.sqrt(f));
+        } else if(fillMethod.equalsIgnoreCase("uniform")){
+            P = MathUtility.randomUniform(p, f);
+            Q = MathUtility.randomUniform(q, f);
+            Z = MathUtility.randomUniform(p, f);
+            Y = MathUtility.randomUniform(q, f);
+        }else {
+            P = new double[p][f];
+            Q = new double[q][f];
+            Z = new double[p][f];
+            Y = new double[p][f];
         }
 
     }
@@ -363,7 +368,7 @@ public class SVDPlusPlus {
         updataZ(userItemsTable);
 
 //        int[] K = {1, 5, 10, 15, 20, 25, 30};
-        int[] K = {40};
+        int[] K = {80};
 
         RsTable ratingTable = Tools.getRatingTable(train);
         double loss = computeLoss(train, lambda, miu);
@@ -397,7 +402,7 @@ public class SVDPlusPlus {
             }
 
             double lastLoss = computeLoss(train, lambda, miu);
-            if (epoch % 5 == 0) {
+            if (epoch % 10 == 0) {
                 List<Rating> recommendations = getRecommendations(ratingTable, miu, K[K.length - 1]);   // note that, the max K
                 for (int k : K) {
                     List<Rating> subset = Tools.getSubset(recommendations, k);

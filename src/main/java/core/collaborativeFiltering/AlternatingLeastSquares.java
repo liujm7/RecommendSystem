@@ -154,7 +154,7 @@ public class AlternatingLeastSquares extends MatrixFactorization {
         }
         printParameters(train, test, epochs, lambda, minRating, maxRating);
         double loss = computeLoss(train, lambda);
-        int[] K = {1, 5, 10, 15, 20, 25, 30};  // recommdation list
+        int[] K = {80};  // recommdation list
 
         ConcurrentHashMap userRatingsTable = Tools.getUserItemsTable(train);
         ConcurrentHashMap itemRatingsTable = Tools.getItemUsersTable(train);
@@ -165,7 +165,7 @@ public class AlternatingLeastSquares extends MatrixFactorization {
             stepQ(itemRatingsTable, lambda);
 
             double lastLoss = computeLoss(train, lambda);
-            if (epoch % 2 == 0) {
+            if (epoch % 10 == 0) {
                 List<Rating> recommendations = getRecommendations(ratingTable, K[K.length - 1]);   // note that, the max K
                 for (int k : K) {
                     List<Rating> subset = Tools.getSubset(recommendations, k);
@@ -179,10 +179,9 @@ public class AlternatingLeastSquares extends MatrixFactorization {
 
             if (lastLoss < loss) {
                 loss = lastLoss;
+            } else {
+                break;
             }
-//            else {
-//                break;
-//            }
         }
 
     }

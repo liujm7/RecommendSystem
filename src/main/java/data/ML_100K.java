@@ -87,12 +87,12 @@ public class ML_100K {
          Tools.updateIndexesToZeroBased(testRatings);
 //        UserKNNv2 userKNNv2 =new UserKNNv2();
 //        userKNNv2.testTopNRecommend(baseRatings,testRatings);
-//        ItemKNNv2 itemKNNv2 = new ItemKNNv2();
-//        itemKNNv2.testTopNRecommend(baseRatings,testRatings);
+        ItemKNNv2 itemKNNv2 = new ItemKNNv2();
+        itemKNNv2.testTopNRecommend(baseRatings,testRatings);
 //        Tuple tuple=Tools.getMaxUserIdAndItemId(baseRatings);
-        FriendMatrixFactorization matrixFactorization = new FriendMatrixFactorization(maxUserId, maxItemId, 20, "uniform");
-        matrixFactorization.testSGDForTopN(baseRatings, testRatings, 100, 0.01, 0.01, 1, 1, 5);
-//        matrixFactorization.testAlsForTopN(baseRatings,testRatings);
+//        FriendMatrixFactorization matrixFactorization = new FriendMatrixFactorization(maxUserId, maxItemId, 20, "uniform");
+//        matrixFactorization.testSGDForTopN(baseRatings, testRatings, 100, 0.01, 0.01, 1, 1, 5);
+////        matrixFactorization.testAlsForTopN(baseRatings,testRatings);
         //        meanFillingTest(baseRatings,testRatings);
 //        userKNNTest(baseRatings,testRatings);
 //        itemKNNTest(baseRatings, testRatings);

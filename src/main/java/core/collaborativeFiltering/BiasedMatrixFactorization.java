@@ -9,6 +9,7 @@ import evaluation.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -68,8 +69,8 @@ public class BiasedMatrixFactorization {
             P = MathUtility.randomUniform(p, f);
             Q = MathUtility.randomUniform(q, f);
         } else {
-            P = MathUtility.randomUniform(p, f);
-            Q = MathUtility.randomUniform(q, f);
+            P = new double[p][f];
+            Q = new double[q][f];
         }
 
     }
@@ -101,12 +102,13 @@ public class BiasedMatrixFactorization {
      */
     public double predict(int userId, int itemId, double miu) {
         double r = 0.0;
-        if (userId >= p || itemId >= q) {
-            return r + miu;
-        }
+//        if (userId >= p || itemId >= q) {
+//            return r + miu;
+//        }
         for (int i = 0; i < f; i++) {
             r += P[userId][i] * Q[itemId][i];
         }
+
         return r + bu[userId] + bi[itemId] + miu;
     }
 
@@ -160,11 +162,11 @@ public class BiasedMatrixFactorization {
         double rmse = 0;
         for (Rating r : ratings) {
             double pui = predict(r.userId, r.itemId, miu);
-            if (pui < minRating) {
-                pui = minRating;
-            } else if (pui > maxRating) {
-                pui = maxRating;
-            }
+//            if (pui < minRating) {
+//                pui = minRating;
+//            } else if (pui > maxRating) {
+//                pui = maxRating;
+//            }
             double eui = r.score - pui;
             mae += Math.abs(eui);
             rmse += eui * eui;
@@ -251,6 +253,11 @@ public class BiasedMatrixFactorization {
         for (int epoch = 1; epoch <= epochs; epoch++) {
             for (Rating r : train) {
                 double pui = predict(r.userId, r.itemId, miu);
+//                if (pui > maxRating) {
+//                    pui = maxRating;
+//                } else if (pui < minRating) {
+//                    pui = minRating;
+//                }
                 double eui = r.score - pui;
 
                 bu[r.userId] += gamma * (eui - lambda * bu[r.userId]);
@@ -301,9 +308,9 @@ public class BiasedMatrixFactorization {
                 }
             }
             Collections.sort(predictRatings);
-//            if((int) userId  ==1){
-//                for (Rating rating:predictRatings.subList(0, Math.min(N, predictRatings.size()))){
-//                    System.out.println(rating.userId+":"+rating.itemId+":"+rating.score);
+//            if ((int) userId == 0) {
+//                for (Rating rating : predictRatings.subList(0, Math.min(N, predictRatings.size()))) {
+//                    System.out.println(rating.userId + ":" + rating.itemId + ":" + rating.score);
 //                }
 //            }
             recommendItems.addAll(predictRatings.subList(0, Math.min(N, predictRatings.size())));
@@ -333,15 +340,12 @@ public class BiasedMatrixFactorization {
         RsTable ratingTable = Tools.getRatingTable(train);
 
 //        int[] K = {1, 5, 10, 15, 20, 25, 30};
-        int[] K = {50};
+        int[] K = {80};
 
         for (int epoch = 1; epoch <= epochs; epoch++) {
             for (Rating r : train) {
                 double pui = predict(r.userId, r.itemId, miu);
-                if (pui > maxRating)
-                    pui = maxRating;
-                if (pui < minRating)
-                    pui = minRating;
+
                 double eui = r.score - pui;
 
                 bu[r.userId] += gamma * (eui - lambda * bu[r.userId]);
@@ -354,7 +358,7 @@ public class BiasedMatrixFactorization {
             }
 
             double lastLoss = computeLoss(train, lambda, miu);
-            if (epoch % 100 == 0) {
+            if (epoch % 10 == 0) {
                 List<Rating> recommendations = getRecommendations(ratingTable, miu, K[K.length - 1]);   // note that, the max K
                 for (int k : K) {
                     List<Rating> subset = Tools.getSubset(recommendations, k);
@@ -376,15 +380,15 @@ public class BiasedMatrixFactorization {
                 break;
             }
 
-            int k = 50;
-            List<Rating> recommendations = getRecommendations(ratingTable, miu, k);   // note that, the max K
-            List<Rating> subset = Tools.getSubset(recommendations, k);
-            Tuple pr = Metrics.computePrecisionAndRecall(subset, test);
-            double map = Metrics.computeMAP(subset, test, k);
-            Tuple cp = Metrics.computeCoverageAndPopularity(subset, train);
-            logger.info("epoch:{}, lastLoss:{},K:{},precision:{},recall:{},coverage:{},popularity:{},map:{}.",
-                    epoch, lastLoss, k, pr.first, pr.second, cp.first, cp.second, map);
-
+//            int k = 100;
+//            List<Rating> recommendations = getRecommendations(ratingTable, miu, k);   // note that, the max K
+//            List<Rating> subset = Tools.getSubset(recommendations, k);
+//            Tuple pr = Metrics.computePrecisionAndRecall(subset, test);
+//            double map = Metrics.computeMAP(subset, test, k);
+//            Tuple cp = Metrics.computeCoverageAndPopularity(subset, train);
+//            logger.info("epoch:{}, lastLoss:{},K:{},precision:{},recall:{},coverage:{},popularity:{},map:{}.",
+//                    epoch, lastLoss, k, pr.first, pr.second, cp.first, cp.second, map);
+//
 
         }
 

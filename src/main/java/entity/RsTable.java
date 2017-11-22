@@ -59,15 +59,14 @@ public class RsTable {
         if (null == mainKey || null == subKey) {
             throw new NullPointerException();
         }
-        if (!main.containsKey(mainKey)) {
+        if (!containsMainKey(mainKey)) {
             main.put(mainKey, new ConcurrentHashMap<Object, Object>());
         }
-//        if (!main.get(mainKey).containsKey(subKey)) {
+
         ConcurrentHashMap<Object, Object> itemTable = main.get(mainKey);
         itemTable.put(subKey, value);
         main.put(subKey, itemTable);
-//        }
-//
+
         if (!subKeyAll.containsKey(subKey)) {
             subKeyAll.put(subKey, subKeyAll.size() + 1);
         }
@@ -79,7 +78,7 @@ public class RsTable {
             throw new NullPointerException();
         }
 
-        if (null == main.get(mainKey)) {
+        if (!containsMainKey(mainKey)) {
             main.put(mainKey, new ConcurrentHashMap<>());
         }
         return main.get(mainKey);
@@ -91,12 +90,9 @@ public class RsTable {
             throw new NullPointerException();
         }
 
-//        if (containsKey(mainKey, subKey)) {
-//            throw new IllegalArgumentException();
-//        }
 
-        if (null == main.get(mainKey)) {
-            main.put(mainKey, new ConcurrentHashMap());
+        if (!containsMainKey(mainKey)) {
+            main.put(mainKey, new ConcurrentHashMap<>());
         }
 
         ConcurrentHashMap<Object, Object> subTable = (ConcurrentHashMap) main.get(mainKey);

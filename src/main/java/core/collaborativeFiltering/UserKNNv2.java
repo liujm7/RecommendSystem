@@ -94,12 +94,13 @@ public class UserKNNv2 {
             weights.add(l);
         }
         //排序
-        Collections.sort(weights, new Comparator<Link>() {
-            @Override
-            public int compare(Link o1, Link o2) {
-                return o1.compareTo(o2);
-            }
-        });
+        Collections.sort(weights);
+//                , new Comparator<Link>() {
+//            @Override
+//            public int compare(Link o1, Link o2) {
+//                return o1.compareTo(o2);
+//            }
+//        });
         return weights.subList(0, Math.min(K, weights.size()));
     }
 
@@ -201,10 +202,11 @@ public class UserKNNv2 {
 
         RsTable ratingTable = Tools.getRatingTable(train);
 
+        //        List<Integer> Ns = new ArrayList<>(Arrays.asList(1, 5, 10, 15, 20, 25, 30));
+        List<Integer> Ns = new ArrayList<>(Arrays.asList(80));
+
         List<Integer> Ks = new ArrayList<>(Arrays.asList(5, 10, 20, 40, 80, 160));
-
-        List<Integer> Ns = new ArrayList<>(Arrays.asList(1, 5, 10, 15, 20, 25, 30));
-
+//        List<Integer> Ks = new ArrayList<>(Arrays.asList(80));
         for (int k : Ks) {
             for (int n : Ns) {
                 List<Rating> recommendations = getRecommendations(ratingTable, wuv, k, n);

@@ -1,10 +1,8 @@
 package data;
 
 import core.baseline.MeanFilling;
-import core.collaborativeFiltering.BiasedMatrixFactorization;
-import core.collaborativeFiltering.FriendMatrixFactorization;
-import core.collaborativeFiltering.MatrixFactorization;
-import core.collaborativeFiltering.SVDPlusPlus;
+import core.baseline.Baseline;
+import core.collaborativeFiltering.*;
 import data.utility.Tools;
 import entity.Rating;
 import entity.Tuple;
@@ -45,9 +43,9 @@ public class ML_1M {
         logger.info("maxUserId:{},maxItemId:{}", maxUserId, maxItemId);
     }
 
-    public static void spilt() {
+    public static void spilt(double testSize) {
         List<Rating> ratings = Tools.getRatings(defaultRatingFile, "::");
-        Tuple<List<Rating>, List<Rating>> data = Tools.trainAndTestSplit(ratings, 0.2);
+        Tuple<List<Rating>, List<Rating>> data = Tools.trainAndTestSplit(ratings, testSize);
         Tools.writeTimedRatings(data.first, trainRatingFile, "\t");
         Tools.writeTimedRatings(data.second, testRatingFile, "\t");
         logger.info("切割结束.");
@@ -65,19 +63,23 @@ public class ML_1M {
     }
 
     public static void main(String[] args) {
+//        spilt(0.5);
         List<Rating> baseRatings = Tools.getRatings(trainRatingFile);
         List<Rating> testRatings = Tools.getRatings(testRatingFile);
 
         Tools.updateIndexesToZeroBased(baseRatings);
         Tools.updateIndexesToZeroBased(testRatings);
+
+//        Baseline baseLine = new Baseline(maxUserId, maxItemId);
+//        baseLine.baseLineEvaluate(baseRatings, testRatings);
 //        UserKNNv2 userKNNv2 =new UserKNNv2();
 //        userKNNv2.testTopNRecommend(baseRatings,testRatings);
-//        ItemKNNv2 itemKNNv2 = new ItemKNNv2();
-//        itemKNNv2.testTopNRecommend(baseRatings,testRatings);
+        ItemKNNv2 itemKNNv2 = new ItemKNNv2();
+        itemKNNv2.testTopNRecommend(baseRatings,testRatings);
 //        Tuple tuple=Tools.getMaxUserIdAndItemId(baseRatings);
-        BiasedMatrixFactorization matrixFactorization = new BiasedMatrixFactorization(maxUserId, maxItemId, 20, "uniform_df");
-        for (double gamma = 0.01; gamma < 0.1; gamma += 0.01)
-            matrixFactorization.testSGDForTopN(baseRatings, testRatings, 500, gamma, 0.01, 0.99, 1, 5);
+//        AlternatingLeastSquares matrixFactorization = new AlternatingLeastSquares(maxUserId, maxItemId, 50, "uniform_df");
+////        for (double gamma = 0.01; gamma < 0.1; gamma += 0.01)
+//        matrixFactorization.testSGDForTopN(baseRatings, testRatings, 350, 0.0007, 0.001, 1, 1, 5);
 //        matrixFactorization.testAlsForTopN(baseRatings,testRatings);
         //        meanFillingTest(baseRatings,testRatings);
 //        userKNNTest(baseRatings,testRatings);

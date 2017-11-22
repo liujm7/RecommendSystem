@@ -22,43 +22,38 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Metrics {
     public static Tuple<Double, Double> computePrecisionAndRecall(List<Rating> recommendations, List<Rating> test) {
-//        ConcurrentHashMap<Object, ConcurrentHashMap<Object, Object>> reommendedTable = new ConcurrentHashMap<>();
+//        ConcurrentHashMap<Object, Object> recommendedTable = new ConcurrentHashMap<>();
 //        for (Rating r : recommendations) {
-//            if (!reommendedTable.containsKey(r.userId)) {
-//                reommendedTable.put(r.userId, new ConcurrentHashMap<Object, Object>());
-//            }
-//            if (!reommendedTable.get(r.userId).containsKey(r.itemId)) {
-//                ConcurrentHashMap<Object, Object> itemsScore = new ConcurrentHashMap<Object, Object>();
-//                itemsScore.put(r.itemId, r.score);
-//                reommendedTable.put(r.userId, itemsScore);
+//            if (!recommendedTable.containsKey(r.userId + ":" + r.itemId)) {
+//                recommendedTable.put(r.userId + ":" + r.itemId, r.score);
 //            }
 //        }
 //        int hit = 0;
 //        for (Rating r : test) {
-//            if (reommendedTable.containsKey(r.userId)) {
-//                if (reommendedTable.get(r.userId).containsKey(r.itemId))
-//                    hit++;
+//            if (recommendedTable.containsKey(r.userId + ":" + r.itemId)) {
+//                hit++;
 //            }
 //        }
 
-
         RsTable recommendedTable = new RsTable();
         for (Rating r : recommendations) {
-            if(!recommendedTable.containsKey(r.userId,r.itemId))
+            if (!recommendedTable.containsKey(r.userId, r.itemId))
                 recommendedTable.put(r.userId, r.itemId, r.score);
         }
 
 
         int hit = 0;
         for (Rating r : test) {
-            if (recommendedTable.containsKey(r.userId, r.itemId))
+            if (recommendedTable.containsKey(r.userId, r.itemId)) {
                 hit++;
+            }
+
         }
         Double precision = 0.0;
         Double recall = 0.0;
         System.out.println("命中数量:" + hit);
         System.out.println("推荐数量:" + recommendations.size());
-        System.out.println("测试数量" + test.size());
+        System.out.println("测试数量:" + test.size());
         if (recommendations.size() > 0) {
             precision = hit * 1.0 / recommendations.size();
         }
@@ -100,7 +95,7 @@ public class Metrics {
 
     public static double computeMAP(List<Rating> recommendations, List<Rating> test, int k) {
         ConcurrentHashMap recommendedRatings = Tools.getUserItemsTable(recommendations);
-        Tools.updateIndexesToZeroBased(test);
+//        Tools.updateIndexesToZeroBased(test);
         RsTable testTable = Tools.getRatingTable(test);
         int validateUserCounter = 0;
         double MAP = 0;

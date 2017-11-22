@@ -41,35 +41,14 @@ public class ItemKNNv2 {
                         continue;
                     }
                     if (!cooccurrences.containsKey(i.itemId, j.itemId)) {
-                        cooccurrences.put(i.itemId, j.itemId, 1.0);
+                        cooccurrences.put(i.itemId, j.itemId, 1.0 / Math.log(items.size() + 1));//降低热门用户的影响
                     } else {
                         double value = (double) cooccurrences.get(i.itemId, j.itemId);
-                        cooccurrences.put(i.itemId, j.itemId, value + 1.0);
+                        cooccurrences.put(i.itemId, j.itemId, value + 1.0 / Math.log(items.size() + 1));
                     }
                 }
             }
         }
-
-
-//        for (int userId : userItemsTable.keySet()) {
-//            List<Rating> items = userItemsTable.get(userId);
-//            //遍历每个用户的商品
-//            for (Rating i : items) {
-//                for (Rating j : items) {
-//                    //如果两个商品相同，跳过循环
-//                    if (i.itemId == j.itemId) {
-//                        continue;
-//                    }
-//                    if (!cooccurrences.containsKey(i.itemId, j.itemId)) {
-//                        cooccurrences.put(i.itemId, j.itemId, 1.0);
-//                    } else {
-//                        cooccurrences.put(i.itemId, j.itemId, (double) cooccurrences.get(i, j) + 1);
-//
-//                    }
-//
-//                }
-//            }
-//        }
 
         return cooccurrences;
     }
@@ -97,7 +76,7 @@ public class ItemKNNv2 {
                 //获取该商品id的所有评分--获取评分用户数量
                 List<Rating> jRatings = itemUsersTable.get((int) jItemId);
                 //计算商品相似性
-                wuv.put(iItemId, jItemId, (Double) coourrencesTable.get(iItemId, jItemId) * 1.0
+                wuv.put(iItemId, jItemId, (double) coourrencesTable.get(iItemId, jItemId) * 1.0
                         / Math.sqrt(iRatings.size() + jRatings.size()));
             }
         }
@@ -167,7 +146,7 @@ public class ItemKNNv2 {
                         continue;
                     }
                     if (recommendedTable.containsKey(userId, iId)) {
-                        double t = (double) ratingTable.get(userId, iId);
+                        double t = (double) recommendedTable.get(userId, iId);
                         recommendedTable.put(userId, iId, t + l.weight);
                     } else {
                         recommendedTable.put(userId, iId, l.weight);
@@ -214,7 +193,7 @@ public class ItemKNNv2 {
         Tuple<Double, Double> precisionAndRecall = Metrics.computePrecisionAndRecall(recommendations, test);
         Tuple<Double, Double> coverageAndPopularity = Metrics.computeCoverageAndPopularity(recommendations, test);
 
-        logger.info("K(Cosine){},N:{},precision:{},coverage:{},Coverage:{},Popularity:{}", K, N
+        logger.info("K(Cosine){},N:{},precision:{},recall:{},Coverage:{},Popularity:{}", K, N
                 , precisionAndRecall.first, precisionAndRecall.second, coverageAndPopularity.first, coverageAndPopularity.second);
 
     }
@@ -235,7 +214,7 @@ public class ItemKNNv2 {
         RsTable ratingTable = Tools.getRatingTable(train);
 
 //        List<Integer> Ns = new ArrayList<>(Arrays.asList(1, 5, 10, 15, 20, 25, 30));
-        List<Integer> Ns = new ArrayList<>(Arrays.asList(80));
+        List<Integer> Ns = new ArrayList<>(Arrays.asList(160));
 
         List<Integer> Ks = new ArrayList<>(Arrays.asList(5, 10, 20, 40, 80, 160));
 //        List<Integer> Ks = new ArrayList<>(Arrays.asList(80));
@@ -245,7 +224,7 @@ public class ItemKNNv2 {
                 List<Rating> recommendations = getRecommendations(ratingTable, wuv, k, n);
                 Tuple precisionAndRecall = Metrics.computePrecisionAndRecall(recommendations, test);
                 Tuple coverageAndPopularity = Metrics.computeCoverageAndPopularity(recommendations, train);
-                logger.info("K(Cosine){},N:{},precision:{},coverage:{},Coverage:{},Popularity:{}", k, n
+                logger.info("K(Cosine){},N:{},precision:{},recall:{},Coverage:{},Popularity:{}", k, n
                         , precisionAndRecall.first, precisionAndRecall.second, coverageAndPopularity.first, coverageAndPopularity.second);
             }
         }
