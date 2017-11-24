@@ -51,44 +51,14 @@ public class ML_1M {
         logger.info("切割结束.");
     }
 
-    public static void meanFillingTest() {
-        List<Rating> trainRating = Tools.getRatings(trainRatingFile, "\t");
-        List<Rating> testRating = Tools.getRatings(testRatingFile, "\t");
-        Tools.updateIndexesToZeroBased(trainRating);
-        Tools.updateIndexesToZeroBased(testRating);
-
-        MeanFilling.globalMeanFilling(trainRating, testRating);
-        MeanFilling.itemMeanFilling(trainRating, testRating);
-        MeanFilling.userMeanFilling(trainRating, testRating);
-    }
-
     public static void main(String[] args) {
 //        spilt(0.5);
         List<Rating> baseRatings = Tools.getRatings(trainRatingFile);
         List<Rating> testRatings = Tools.getRatings(testRatingFile);
-
         Tools.updateIndexesToZeroBased(baseRatings);
         Tools.updateIndexesToZeroBased(testRatings);
+        SVDPlusPlus euclideanEmbedding = new SVDPlusPlus(maxUserId, maxItemId, 100, "uniform_df");
+        euclideanEmbedding.testSGDForTopN(baseRatings, testRatings, 20, 0.02, 0.01, 1, 1, 5);
 
-//        Baseline baseLine = new Baseline(maxUserId, maxItemId);
-//        baseLine.baseLineEvaluate(baseRatings, testRatings);
-//        UserKNN userKNN =new UserKNN();
-//        userKNN.testTopNRecommend(baseRatings,testRatings);
-        ItemKNN itemKNNv2 = new ItemKNN();
-        itemKNNv2.testTopNRecommend(baseRatings,testRatings);
-//        Tuple tuple=Tools.getMaxUserIdAndItemId(baseRatings);
-//        AlternatingLeastSquares matrixFactorization = new AlternatingLeastSquares(maxUserId, maxItemId, 50, "uniform_df");
-////        for (double gamma = 0.01; gamma < 0.1; gamma += 0.01)
-//        matrixFactorization.testSGDForTopN(baseRatings, testRatings, 350, 0.0007, 0.001, 1, 1, 5);
-//        matrixFactorization.testAlsForTopN(baseRatings,testRatings);
-        //        meanFillingTest(baseRatings,testRatings);
-//        userKNNTest(baseRatings,testRatings);
-//        itemKNNTest(baseRatings, testRatings);
-//        matrixFactorizationTest(baseRatings,testRatings);
-//        biasedMatrixFactorizationTest(baseRatings,testRatings);
-//        SVDPlusPlusTest(baseRatings,testRatings);
-
-//        AlternatingLeastSquaresTest(baseRatings,testRatings);
-//        EuclideanEmbeddingTest(baseRatings, testRatings);
     }
 }

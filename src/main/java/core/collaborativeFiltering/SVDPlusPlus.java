@@ -9,6 +9,7 @@ import evaluation.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.xml.bind.SchemaOutputResolver;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -65,12 +66,12 @@ public class SVDPlusPlus {
             Q = MathUtility.randomUniform(q, f, 1.0 / Math.sqrt(f));
             Z = MathUtility.randomUniform(p, f, 1.0 / Math.sqrt(f));
             Y = MathUtility.randomUniform(q, f, 1.0 / Math.sqrt(f));
-        } else if(fillMethod.equalsIgnoreCase("uniform")){
+        } else if (fillMethod.equalsIgnoreCase("uniform")) {
             P = MathUtility.randomUniform(p, f);
             Q = MathUtility.randomUniform(q, f);
             Z = MathUtility.randomUniform(p, f);
             Y = MathUtility.randomUniform(q, f);
-        }else {
+        } else {
             P = new double[p][f];
             Q = new double[q][f];
             Z = new double[p][f];
@@ -402,17 +403,17 @@ public class SVDPlusPlus {
             }
 
             double lastLoss = computeLoss(train, lambda, miu);
-            if (epoch % 10 == 0) {
-                List<Rating> recommendations = getRecommendations(ratingTable, miu, K[K.length - 1]);   // note that, the max K
-                for (int k : K) {
-                    List<Rating> subset = Tools.getSubset(recommendations, k);
-                    Tuple pr = Metrics.computePrecisionAndRecall(subset, test);
-                    double map = Metrics.computeMAP(subset, test, k);
-                    Tuple cp = Metrics.computeCoverageAndPopularity(subset, train);
-                    logger.info("epoch:{}, lastLoss:{},K:{},precision:{},recall:{},coverage:{},popularity:{},map:{}.",
-                            epoch, lastLoss, k, pr.first, pr.second, cp.first, cp.second, map);
-                }
+
+            List<Rating> recommendations = getRecommendations(ratingTable, miu, K[K.length - 1]);   // note that, the max K
+            for (int k : K) {
+                List<Rating> subset = Tools.getSubset(recommendations, k);
+                Tuple pr = Metrics.computePrecisionAndRecall(subset, test);
+                double map = Metrics.computeMAP(subset, test, k);
+                Tuple cp = Metrics.computeCoverageAndPopularity(subset, train);
+                logger.info("epoch:{}, lastLoss:{},K:{},precision:{},recall:{},coverage:{},popularity:{},map:{}.",
+                        epoch, lastLoss, k, pr.first, pr.second, cp.first, cp.second, map);
             }
+
 
             if (decay != 1) {
                 gamma *= decay;

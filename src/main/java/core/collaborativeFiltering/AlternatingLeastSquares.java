@@ -28,11 +28,29 @@ public class AlternatingLeastSquares extends MatrixFactorization {
     public AlternatingLeastSquares() {
     }
 
+    /**
+     * Description: 初始化
+     *
+     * @param p          用户数
+     * @param q          商品数
+     * @param f          特征维度数量
+     * @param fillMethod 填充方式
+     */
     public AlternatingLeastSquares(int p, int q, int f, String fillMethod) {
 
         super.initial(p, q, f, fillMethod);
     }
 
+    /**
+     * Description: 输出参数
+     *
+     * @param train     训练集合
+     * @param test      测试集合
+     * @param epochs    迭代次数
+     * @param lambda    学习率
+     * @param minRating 最低分
+     * @param maxRating 最高分
+     */
     protected void printParameters(List<Rating> train, List<Rating> test, int epochs, double lambda
             , double minRating, double maxRating) {
         logger.info(getClass().getName());
@@ -45,6 +63,12 @@ public class AlternatingLeastSquares extends MatrixFactorization {
         logger.info("maximumRating,{}", maxRating);
     }
 
+    /**
+     * Description:计算P矩阵步骤
+     *
+     * @param userRatingsTable 用户评分表
+     * @param lambda           学习率
+     */
     protected void stepP(ConcurrentHashMap userRatingsTable, double lambda) {
         for (Object userId : userRatingsTable.keySet()) {
             List<Rating> ratings = (List<Rating>) userRatingsTable.get(userId);
@@ -63,7 +87,7 @@ public class AlternatingLeastSquares extends MatrixFactorization {
             }
             // lamda * I + A
             for (int i = 0; i < f; i++) {
-                Au[i][i] += lambda * ratings.size();
+                Au[i][i] += lambda * ratings.size();//* ratings.size()
             }
 
             double[][] AuReverse = MathUtility.inverseMatrix(Au); // O(K^3)
@@ -73,11 +97,17 @@ public class AlternatingLeastSquares extends MatrixFactorization {
                 for (int j = 0; j < f; j++) {
                     vij += AuReverse[i][j] * du[j];
                 }
-                P[(Integer) userId][i] = vij;
+                P[(int) userId][i] = vij;
             }
         }
     }
 
+    /**
+     * Description:计算Q矩阵步骤
+     *
+     * @param itemRatingsTable 商品评分表
+     * @param lambda           学习率
+     */
     protected void stepQ(ConcurrentHashMap itemRatingsTable, double lambda) {
         for (Object itemId : itemRatingsTable.keySet()) {
             List<Rating> ratings = (List<Rating>) itemRatingsTable.get(itemId);
@@ -96,7 +126,7 @@ public class AlternatingLeastSquares extends MatrixFactorization {
             }
 
             for (int i = 0; i < f; i++) {
-                Ai[i][i] += lambda * ratings.size();
+                Ai[i][i] += lambda * ratings.size();//* ratings.size()
             }
 
             double[][] AiReverse = MathUtility.inverseMatrix(Ai);
@@ -105,15 +135,31 @@ public class AlternatingLeastSquares extends MatrixFactorization {
                 for (int j = 0; j < f; j++) {
                     vij += AiReverse[i][j] * di[j];
                 }
-                Q[(Integer) itemId][i] += vij;
+                Q[(int) itemId][i] = vij;
             }
         }
     }
 
+    /**
+     * Description:固定部分训练参数
+     *
+     * @param train  训练集
+     * @param epochs 迭代次数
+     */
     public void ALS(List<Rating> train, int epochs) {
-        ALS(train, null, epochs, 0.0001, 1.0, 5.0);
+        ALS(train, null, epochs, 0.01, 1.0, 5.0);
     }
 
+    /**
+     * Description:固定部分训练参数
+     *
+     * @param train     训练集
+     * @param test      测试集
+     * @param epochs    迭代次数
+     * @param lambda    学习率
+     * @param minRating 最低分
+     * @param maxRating 最高分
+     */
     public void ALS(List<Rating> train, List<Rating> test, int epochs, double lambda
             , double minRating, double maxRating) {
         List<Rating> trainOrTest = (test == null ? train : test);
@@ -130,23 +176,38 @@ public class AlternatingLeastSquares extends MatrixFactorization {
 
             double finalLoss = computeLoss(train, lambda);
 
-            if (epoch % 5 == 0){
+            if (epoch % 5 == 0) {
                 Tuple maeAndRmse = evaluateMaeRmse(trainOrTest);
                 logger.info("epoch:{},loss:{},{}-mae:{},{}-rmse:{}", epoch, loss, trainOrTestString, maeAndRmse.first, trainOrTestString, maeAndRmse.second);
             }
             if (finalLoss < loss) {
                 loss = finalLoss;
+            } else {
+                break;
             }
-//            else {
-//                break;
-//            }
         }
     }
 
+    /**
+     * Description:固定部分参数
+     *
+     * @param train 训练集
+     * @param test  测试集
+     */
     public void testAlsForTopN(List<Rating> train, List<Rating> test) {
-        testALSForTopN(train, test, 100, 0.001, 1, 5);
+        testALSForTopN(train, test, 30, 0.01, 1, 5);
     }
 
+    /**
+     * Descritpion: 测试TopN推荐效果
+     *
+     * @param train     训练集
+     * @param test      测试集
+     * @param epochs    迭代次数 (建议参数在5-20次之间)
+     * @param lambda    学习率
+     * @param minRating 最低分
+     * @param maxRating 最高分
+     */
     public void testALSForTopN(List<Rating> train, List<Rating> test, int epochs, double lambda
             , double minRating, double maxRating) {
         if (train == null || test == null || train.size() < 1 || test.size() < 1) {
@@ -161,21 +222,21 @@ public class AlternatingLeastSquares extends MatrixFactorization {
         RsTable ratingTable = Tools.getRatingTable(train);
 
         for (int epoch = 1; epoch <= epochs; epoch++) {
-            stepP(userRatingsTable, lambda);
             stepQ(itemRatingsTable, lambda);
+            stepP(userRatingsTable, lambda);
 
             double lastLoss = computeLoss(train, lambda);
-            if (epoch % 10 == 0) {
-                List<Rating> recommendations = getRecommendations(ratingTable, K[K.length - 1]);   // note that, the max K
-                for (int k : K) {
-                    List<Rating> subset = Tools.getSubset(recommendations, k);
-                    Tuple pr = Metrics.computePrecisionAndRecall(subset, test);
-                    Tuple cp = Metrics.computeCoverageAndPopularity(subset, train);
-                    double map = Metrics.computeMAP(subset, test, k);
-                    logger.info("epoch:{},loss:{}K:{},precision:{},recall:{},coverage:{},popularity:{},map:{}.",
-                            epoch, loss, k, pr.first, pr.second, cp.first, cp.second, map);
-                }
+
+            List<Rating> recommendations = getRecommendations(ratingTable, K[K.length - 1]);   // note that, the max K
+            for (int k : K) {
+                List<Rating> subset = Tools.getSubset(recommendations, k);
+                Tuple pr = Metrics.computePrecisionAndRecall(subset, test);
+                Tuple cp = Metrics.computeCoverageAndPopularity(subset, train);
+                double map = Metrics.computeMAP(subset, test, k);
+                logger.info("epoch:{},loss:{},K:{},precision:{},recall:{},coverage:{},popularity:{},map:{}.",
+                        epoch, loss, k, pr.first, pr.second, cp.first, cp.second, map);
             }
+
 
             if (lastLoss < loss) {
                 loss = lastLoss;

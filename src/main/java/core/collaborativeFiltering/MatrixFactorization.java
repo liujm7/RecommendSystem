@@ -1,5 +1,7 @@
 package core.collaborativeFiltering;
 
+import com.sun.org.apache.xpath.internal.SourceTree;
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import core.MathUtility;
 import data.utility.Tools;
 import entity.Rating;
@@ -58,9 +60,13 @@ public class MatrixFactorization {
         } else if (fillMethod.equalsIgnoreCase("gaussian")) {
             P = MathUtility.randomGaussian(p, f, 0, 1);
             Q = MathUtility.randomGaussian(q, f, 0, 1);
-        } else {
+        } else if (fillMethod.equalsIgnoreCase("unifom")) {
             P = MathUtility.randomUniform(p, f);
             Q = MathUtility.randomUniform(q, f);
+
+        } else {
+            P = new double[p][f];
+            Q = new double[q][f];
         }
     }
 
@@ -308,17 +314,17 @@ public class MatrixFactorization {
             }
 
             double lastLoss = computeLoss(train, lambda);
-            if (epoch % 10 == 0) {
-                List<Rating> recommendations = getRecommendations(ratingTable, K[K.length - 1]);   // note that, the max K
-                for (int k : K) {
-                    List<Rating> subset = Tools.getSubset(recommendations, k);
-                    Tuple pr = Metrics.computePrecisionAndRecall(subset, test);
-                    Tuple cp = Metrics.computeCoverageAndPopularity(subset, train);
-                    Double map = Metrics.computeMAP(subset, test, k);
-                    logger.info("epoch:{}, lastLoss:{},K:{},precision:{},recall:{},coverage:{},popularity:{},map:{}.",
-                            epoch, lastLoss, k, pr.first, pr.second, cp.first, cp.second, map);
-                }
+
+            List<Rating> recommendations = getRecommendations(ratingTable, K[K.length - 1]);   // note that, the max K
+            for (int k : K) {
+                List<Rating> subset = Tools.getSubset(recommendations, k);
+                Tuple cp = Metrics.computeCoverageAndPopularity(subset, train);
+                Tuple pr = Metrics.computePrecisionAndRecall(subset, test);
+                Double map = Metrics.computeMAP(subset, test, k);
+                logger.info("epoch:{}, lastLoss:{},K:{},precision:{},recall:{},coverage:{},popularity:{},map:{}.",
+                        epoch, lastLoss, k, pr.first, pr.second, cp.first, cp.second, map);
             }
+
 
             if (decay != 1) {
                 gamma *= decay;

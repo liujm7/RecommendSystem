@@ -1,6 +1,7 @@
 package data;
 
 import core.baseline.MeanFilling;
+import core.collaborativeFiltering.BiasedMatrixFactorization;
 import data.utility.Tools;
 import entity.Rating;
 import entity.Tuple;
@@ -33,8 +34,6 @@ public class ML_10M {
     public static int maxItemId = 65133;
 
 
-
-
     public static void updateDataInformation() {
         List<Rating> ratings = Tools.getRatings(defaultRatingFile, "::");
         Tuple q = Tools.getMaxUserIdAndItemId(ratings);
@@ -62,9 +61,22 @@ public class ML_10M {
         MeanFilling.userMeanFilling(trainRating, testRating);
     }
 
+    /**
+     * 目前本机内存溢出，未测试
+     *
+     * @param args
+     */
     public static void main(String[] args) {
-        updateDataInformation();
-        spilt();
-        meanFillingTest();
+//        updateDataInformation();
+//        spilt();
+//        meanFillingTest();
+        List<Rating> baseRatings = Tools.getRatings(trainRatingFile);
+        List<Rating> testRatings = Tools.getRatings(testRatingFile);
+
+        Tools.updateIndexesToZeroBased(baseRatings);
+        Tools.updateIndexesToZeroBased(testRatings);
+        BiasedMatrixFactorization euclideanEmbedding = new BiasedMatrixFactorization(maxUserId, maxItemId, 50, "uniform_df");
+        euclideanEmbedding.testSGDForTopN(baseRatings, testRatings, 350, 0.0008, 0.001, 1, 1, 5);
+
     }
 }

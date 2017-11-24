@@ -102,9 +102,6 @@ public class BiasedMatrixFactorization {
      */
     public double predict(int userId, int itemId, double miu) {
         double r = 0.0;
-//        if (userId >= p || itemId >= q) {
-//            return r + miu;
-//        }
         for (int i = 0; i < f; i++) {
             r += P[userId][i] * Q[itemId][i];
         }
@@ -324,7 +321,7 @@ public class BiasedMatrixFactorization {
      *
      * @param train     训练集
      * @param test      测试集
-     * @param epochs    迭代次数
+     * @param epochs    迭代次数(建议5-20次之间)
      * @param gamma     gamma
      * @param lambda    lambda
      * @param decay     gamma 学习更新率
@@ -358,17 +355,17 @@ public class BiasedMatrixFactorization {
             }
 
             double lastLoss = computeLoss(train, lambda, miu);
-            if (epoch % 10 == 0) {
-                List<Rating> recommendations = getRecommendations(ratingTable, miu, K[K.length - 1]);   // note that, the max K
-                for (int k : K) {
-                    List<Rating> subset = Tools.getSubset(recommendations, k);
-                    Tuple pr = Metrics.computePrecisionAndRecall(subset, test);
-                    double map = Metrics.computeMAP(subset, test, k);
-                    Tuple cp = Metrics.computeCoverageAndPopularity(subset, train);
-                    logger.info("epoch:{}, lastLoss:{},K:{},precision:{},recall:{},coverage:{},popularity:{},map:{}.",
-                            epoch, lastLoss, k, pr.first, pr.second, cp.first, cp.second, map);
-                }
+
+            List<Rating> recommendations = getRecommendations(ratingTable, miu, K[K.length - 1]);   // note that, the max K
+            for (int k : K) {
+                List<Rating> subset = Tools.getSubset(recommendations, k);
+                Tuple pr = Metrics.computePrecisionAndRecall(subset, test);
+                Tuple cp = Metrics.computeCoverageAndPopularity(subset, train);
+                double map = Metrics.computeMAP(subset, test, k);
+                logger.info("epoch:{}, lastLoss:{},K:{},precision:{},recall:{},coverage:{},popularity:{},map:{}.",
+                        epoch, lastLoss, k, pr.first, pr.second, cp.first, cp.second, map);
             }
+
 
             if (decay != 1) {
                 gamma *= decay;
@@ -379,16 +376,6 @@ public class BiasedMatrixFactorization {
             } else {
                 break;
             }
-
-//            int k = 100;
-//            List<Rating> recommendations = getRecommendations(ratingTable, miu, k);   // note that, the max K
-//            List<Rating> subset = Tools.getSubset(recommendations, k);
-//            Tuple pr = Metrics.computePrecisionAndRecall(subset, test);
-//            double map = Metrics.computeMAP(subset, test, k);
-//            Tuple cp = Metrics.computeCoverageAndPopularity(subset, train);
-//            logger.info("epoch:{}, lastLoss:{},K:{},precision:{},recall:{},coverage:{},popularity:{},map:{}.",
-//                    epoch, lastLoss, k, pr.first, pr.second, cp.first, cp.second, map);
-//
 
         }
 

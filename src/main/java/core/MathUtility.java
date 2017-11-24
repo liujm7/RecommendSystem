@@ -13,7 +13,6 @@ import java.util.Random;
  * @package_name: algorithm
  */
 public class MathUtility {
-
     /**
      * Description: 逻辑函数
      *
@@ -49,10 +48,9 @@ public class MathUtility {
      */
     public static double norm2(double[] vector) {
         double norm = 0.0;
-        int len = vector.length;
 
-        for (int i = 0; i < len; i++) {
-            norm += (vector[i] * vector[i]);
+        for (double aVector : vector) {
+            norm += (aVector * aVector);
         }
         return Math.sqrt(norm);
     }
@@ -67,11 +65,10 @@ public class MathUtility {
         if (matrix == null)
             return 0;
         double norm = 0.0;
-        int m = matrix.length;
         int n = matrix[0].length;
-        for (int i = 0; i < m; i++) {
+        for (double[] aMatrix : matrix) {
             for (int j = 0; j < n; j++) {
-                norm += (matrix[i][j] * matrix[i][j]);
+                norm += (aMatrix[j] * aMatrix[j]);
             }
         }
         return Math.sqrt(norm);

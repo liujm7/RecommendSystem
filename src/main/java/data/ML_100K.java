@@ -83,25 +83,11 @@ public class ML_100K {
         List<Rating> baseRatings = Tools.getRatings(baseRatingFile);
         List<Rating> testRatings = Tools.getRatings(testRatingFile);
 
-         Tools.updateIndexesToZeroBased(baseRatings);
-         Tools.updateIndexesToZeroBased(testRatings);
-//        UserKNN userKNNv2 =new UserKNN();
-//        userKNN.testTopNRecommend(baseRatings,testRatings);
-        ItemKNN itemKNNv2 = new ItemKNN();
-        itemKNNv2.testTopNRecommend(baseRatings,testRatings);
-//        Tuple tuple=Tools.getMaxUserIdAndItemId(baseRatings);
-//        FriendMatrixFactorization matrixFactorization = new FriendMatrixFactorization(maxUserId, maxItemId, 20, "uniform");
-//        matrixFactorization.testSGDForTopN(baseRatings, testRatings, 100, 0.01, 0.01, 1, 1, 5);
-////        matrixFactorization.testAlsForTopN(baseRatings,testRatings);
-        //        meanFillingTest(baseRatings,testRatings);
-//        userKNNTest(baseRatings,testRatings);
-//        itemKNNTest(baseRatings, testRatings);
-//        matrixFactorizationTest(baseRatings,testRatings);
-//        biasedMatrixFactorizationTest(baseRatings,testRatings);
-//        SVDPlusPlusTest(baseRatings,testRatings);
+        Tools.updateIndexesToZeroBased(baseRatings);
+        Tools.updateIndexesToZeroBased(testRatings);
 
-//        AlternatingLeastSquaresTest(baseRatings,testRatings);
-//        EuclideanEmbeddingTest(baseRatings, testRatings);
+        AlternatingLeastSquares matrixFactorization = new AlternatingLeastSquares(maxUserId, maxItemId, 50, "uniform_df");
+        matrixFactorization.testAlsForTopN(baseRatings, testRatings);
     }
 
 

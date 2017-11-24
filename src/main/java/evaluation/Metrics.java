@@ -6,10 +6,9 @@ import entity.RsTable;
 import entity.Tuple;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.*;
 
 /**
  * @version: 1.0
@@ -22,30 +21,16 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Metrics {
     public static Tuple<Double, Double> computePrecisionAndRecall(List<Rating> recommendations, List<Rating> test) {
-//        ConcurrentHashMap<Object, Object> recommendedTable = new ConcurrentHashMap<>();
-//        for (Rating r : recommendations) {
-//            if (!recommendedTable.containsKey(r.userId + ":" + r.itemId)) {
-//                recommendedTable.put(r.userId + ":" + r.itemId, r.score);
-//            }
-//        }
-//        int hit = 0;
-//        for (Rating r : test) {
-//            if (recommendedTable.containsKey(r.userId + ":" + r.itemId)) {
-//                hit++;
-//            }
-//        }
-
         RsTable recommendedTable = new RsTable();
         for (Rating r : recommendations) {
             if (!recommendedTable.containsKey(r.userId, r.itemId))
                 recommendedTable.put(r.userId, r.itemId, r.score);
         }
 
-
-        int hit = 0;
+        AtomicInteger hit = new AtomicInteger(0);
         for (Rating r : test) {
             if (recommendedTable.containsKey(r.userId, r.itemId)) {
-                hit++;
+                hit.getAndIncrement();
             }
 
         }
@@ -55,10 +40,10 @@ public class Metrics {
         System.out.println("推荐数量:" + recommendations.size());
         System.out.println("测试数量:" + test.size());
         if (recommendations.size() > 0) {
-            precision = hit * 1.0 / recommendations.size();
+            precision = hit.doubleValue() / recommendations.size();
         }
         if (test.size() > 0) {
-            recall = hit * 1.0 / test.size();
+            recall = hit.doubleValue() / test.size();
         }
 
         return new Tuple<>(precision, recall);
@@ -95,15 +80,13 @@ public class Metrics {
 
     public static double computeMAP(List<Rating> recommendations, List<Rating> test, int k) {
         ConcurrentHashMap recommendedRatings = Tools.getUserItemsTable(recommendations);
-//        Tools.updateIndexesToZeroBased(test);
         RsTable testTable = Tools.getRatingTable(test);
-        int validateUserCounter = 0;
+        AtomicInteger validateUserCounter = new AtomicInteger(0);
         double MAP = 0;
         for (Object userId : testTable.keys()) {
             if (testTable.containsMainKey(userId)) {
                 List<Rating> recommendedUserRatings = (List<Rating>) recommendedRatings.get(userId);
                 ConcurrentHashMap testUserRatings = (ConcurrentHashMap) testTable.get(userId);
-//                int length = (k > recommendedUserRatings.size() ? recommendedUserRatings.size() : k);
                 if (recommendedUserRatings == null || recommendedUserRatings.size() < 1) {
                     continue;
                 }
@@ -126,11 +109,11 @@ public class Metrics {
                     averagePrecisionPerUser /= length;
                     MAP += averagePrecisionPerUser;
                 }
-                validateUserCounter++; // recommended users which also in test
+                validateUserCounter.getAndIncrement(); // recommended users which also in test
             }
         }
-        if (validateUserCounter > 0) {
-            return MAP / validateUserCounter;
+        if (validateUserCounter.get() > 0) {
+            return MAP / validateUserCounter.get();
         }
         return 0.0;
     }

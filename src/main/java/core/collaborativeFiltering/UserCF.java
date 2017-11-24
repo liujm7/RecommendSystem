@@ -2,13 +2,20 @@ package core.collaborativeFiltering;
 
 import core.MathUtility;
 import data.utility.Tools;
+import entity.Link;
 import entity.Rating;
+import entity.RsTable;
 import entity.Tuple;
+import evaluation.Metrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @version: 1.0
@@ -71,14 +78,13 @@ public class UserCF {
         return new Tuple(mae, rmse);
     }
 
-
     public void userCFMaeRmse(List<Rating> train, List<Rating> test, int maxUserId, int maxItemId) {
         double[] userMeanRating = calculateUserMeanRating(train, maxUserId + 1);
         double[][] trainMatrix = Tools.transfrom(train, maxUserId + 1, maxItemId + 1);
         double[][] similarities = MathUtility.computeSimilarity(trainMatrix, "PearsonCorrelation");   // PearsonCorrelation | Cosine
 
         Tuple result = evaluateMaeRmse(userMeanRating, similarities, trainMatrix, test);
-        logger.info("UserKNN,mae,{},rmse,{}", result.first, result.second);
+        logger.info("userCF,mae,{},rmse,{}", result.first, result.second);
     }
 
 
